@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: format
+            command: nix fmt -- --ci
+          - name: lint
+            command: nix run .#lint
+          - name: test
+            command: nix run .#test
+          - name: build
+            command: nix build
+    name: ${{ matrix.name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+
+      - name: Run ${{ matrix.name }}
+        run: ${{ matrix.command }}

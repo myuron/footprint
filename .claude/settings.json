@@ -1,0 +1,52 @@
+{
+  "autoMemoryEnabled": false,
+  "permissions": {
+    "allow": [
+      "WebFetch",
+      "WebSearch",
+      "Bash(ls *)",
+      "Bash(head *)",
+      "Bash(which *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(nix fmt)",
+      "Bash(nix run .#lint)",
+      "Bash(nix run .#test)",
+      "Bash(nix build)",
+      "Read(./docs/**)",
+      "Read(./src/**)"
+    ],
+    "ask": ["Write(flake.nix)"],
+    "deny": [
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nix fmt"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/quality-gate.sh\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}
